@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from services.runner import run_method
+from backend.services.runner import run_method
 
 router = APIRouter(tags=["run"])
 

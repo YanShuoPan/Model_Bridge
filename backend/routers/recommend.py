@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from services.recommender import recommend_methods
+from backend.services.recommender import recommend_methods
 
 router = APIRouter(tags=["recommend"])
 

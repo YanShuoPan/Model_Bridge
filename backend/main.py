@@ -20,7 +20,7 @@ Path("backend/storage/runs").mkdir(parents=True, exist_ok=True)
 Path("backend/storage/demo").mkdir(parents=True, exist_ok=True)
 
 # Routers
-from routers import parse, recommend, run  # noqa
+from backend.routers import parse, recommend, run  # noqa
 app.include_router(parse.router, prefix="/api")
 app.include_router(recommend.router, prefix="/api")
 app.include_router(run.router, prefix="/api")

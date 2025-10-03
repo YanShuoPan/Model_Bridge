@@ -1,7 +1,7 @@
 import os, uuid, json
 import pandas as pd
-from methods.base import METHODS_REGISTRY
-from services.reports import render_html_report
+from backend.methods.base import METHODS_REGISTRY
+from backend.services.reports import render_html_report
 
 def run_method(method_id: str, file_path: str, roles: dict, params: dict):
     if method_id not in METHODS_REGISTRY:

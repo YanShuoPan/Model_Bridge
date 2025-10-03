@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form
-from services.parser import parse_question_and_csv
+from backend.services.parser import parse_question_and_csv
 
 router = APIRouter(tags=["parse"])
 

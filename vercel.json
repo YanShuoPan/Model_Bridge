@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "frontend/package.json", "use": "@vercel/next" }
+  ],
+  "env": {
+    "NEXT_PUBLIC_API": "https://<your-api-name>.onrender.com/api"
+  }
+}

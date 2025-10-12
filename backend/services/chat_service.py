@@ -5,9 +5,10 @@
 
 import os
 import json
+from pathlib import Path
 from openai import OpenAI
 from dotenv import load_dotenv
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 # 載入環境變數
 load_dotenv(dotenv_path="backend/.env")
@@ -273,6 +274,126 @@ def answer_question_directly(question: str, question_type: str) -> Dict[str, Any
         }
 
 
+def load_pre_run_results(method_id: str, example_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """
+    載入預執行結果
+
+    Args:
+        method_id: 方法 ID
+        example_id: 範例 ID（可選，預設載入第一個範例）
+
+    Returns:
+        預執行結果字典，如果失敗返回 None
+    """
+    try:
+        # 如果沒指定 example_id，載入第一個範例
+        if not example_id:
+            examples_dir = Path(f"backend/knowledge_base/methods/{method_id}/examples")
+            if examples_dir.exists():
+                # 獲取第一個範例目錄
+                example_dirs = [d for d in examples_dir.iterdir() if d.is_dir()]
+                if example_dirs:
+                    example_id = example_dirs[0].name
+
+        if not example_id:
+            print(f"[載入預執行結果] 未找到 {method_id} 的範例")
+            return None
+
+        # 讀取 results.json
+        results_path = Path(f"backend/knowledge_base/methods/{method_id}/examples/{example_id}/pre_run_results/results.json")
+
+        if not results_path.exists():
+            print(f"[載入預執行結果] 結果文件不存在: {results_path}")
+            return None
+
+        with open(results_path, 'r', encoding='utf-8') as f:
+            results = json.load(f)
+
+        # 讀取解釋指南
+        guide_path = results_path.parent / "interpretation_guide.md"
+        if guide_path.exists():
+            with open(guide_path, 'r', encoding='utf-8') as f:
+                results["interpretation_guide"] = f.read()
+        else:
+            results["interpretation_guide"] = ""
+
+        print(f"[載入預執行結果] 成功載入 {method_id}/{example_id}")
+        return results
+
+    except Exception as e:
+        print(f"[載入預執行結果] 失敗: {e}")
+        return None
+
+
+def generate_result_explanation(results: Dict[str, Any]) -> str:
+    """
+    使用 GPT 根據預執行結果和解釋指南生成簡短解釋
+
+    Args:
+        results: 預執行結果（包含 interpretation_guide）
+
+    Returns:
+        GPT 生成的簡短解釋（150-200字）
+    """
+    try:
+        interpretation_guide = results.get("interpretation_guide", "")
+        metrics = results.get("metrics", {})
+        summary = results.get("summary", {})
+        coefficients = results.get("coefficients", {})
+
+        # 提取關鍵係數（勝算比最大和最小的）
+        if coefficients:
+            coef_list = [(k, v.get("odds_ratio", 1.0)) for k, v in coefficients.items()]
+            coef_list.sort(key=lambda x: abs(x[1] - 1.0), reverse=True)
+            top_factors = coef_list[:3]  # 取影響最大的 3 個
+        else:
+            top_factors = []
+
+        prompt = f"""你是統計分析解說員。請根據以下範例執行結果，用簡潔易懂的語言向用戶解釋這個範例展示了什麼。
+
+**範例名稱**: {results.get('example_name', '統計分析範例')}
+**樣本數**: {summary.get('sample_size')} 筆
+**結果變數**: {summary.get('outcome_variable')}
+
+**主要指標**:
+{json.dumps(metrics, ensure_ascii=False, indent=2)}
+
+**關鍵影響因素**:
+{', '.join([f"{k} (勝算比={v:.2f})" for k, v in top_factors[:3]]) if top_factors else '無'}
+
+**解釋指南重點**:
+{interpretation_guide[:500] if len(interpretation_guide) > 500 else interpretation_guide}
+
+請生成一段 **150-200 字**的解釋，包括：
+1. 這個範例在做什麼分析（1句話）
+2. 主要發現是什麼（用具體數字說明，2-3句）
+3. 對實務的意義（1-2句）
+
+要求：
+- 簡潔明瞭，突出關鍵數字
+- 適合非統計背景讀者
+- 不要使用術語，用白話文
+- 直接回答，不要加標題或前綴"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "你是專業的統計分析解說員，擅長將複雜結果轉化為易懂的語言。回答要簡潔、直接、突出關鍵數字。"},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=400
+        )
+
+        explanation = response.choices[0].message.content.strip()
+        print(f"[生成結果解釋] 成功生成 {len(explanation)} 字解釋")
+        return explanation
+
+    except Exception as e:
+        print(f"[生成結果解釋] 失敗: {e}")
+        return "這個範例展示了如何使用統計方法進行數據分析，並提供了實際的執行結果和解釋。"
+
+
 def generate_chat_response(question: str) -> Dict[str, Any]:
     """
     生成對話式回覆
@@ -310,7 +431,23 @@ def generate_chat_response(question: str) -> Dict[str, Any]:
     recommended_method_id = analysis.get("recommended_method")
     if recommended_method_id and recommended_method_id != "none":
         if recommended_method_id in AVAILABLE_METHODS:
-            method_info = AVAILABLE_METHODS[recommended_method_id]
+            method_info = AVAILABLE_METHODS[recommended_method_id].copy()
+
+            # 【新增】載入預執行結果
+            pre_run_results = load_pre_run_results(recommended_method_id)
+
+            if pre_run_results:
+                # 生成結果解釋
+                result_explanation = generate_result_explanation(pre_run_results)
+
+                # 添加到方法資訊中
+                method_info["pre_run_results"] = pre_run_results
+                method_info["result_explanation"] = result_explanation
+
+                print(f"[推薦方法] 已包含預執行結果和解釋")
+            else:
+                print(f"[推薦方法] 未找到預執行結果，使用原始資訊")
+
             response["recommended_methods"] = [{
                 "method_id": recommended_method_id,
                 **method_info

@@ -1,0 +1,115 @@
+{
+  "method_id": "logistic_regression",
+  "example_id": "customer_churn",
+  "example_name": "客戶流失預測分析",
+  "executed_at": "2025-10-13T02:26:12.243243",
+  "execution_time_seconds": 0.98,
+  "metrics": {
+    "accuracy": 1.0,
+    "auc": 1.0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "coefficients": {
+    "age": {
+      "coefficient": 0.2888,
+      "odds_ratio": 1.3348,
+      "std_err": null,
+      "p_value": null
+    },
+    "tenure_months": {
+      "coefficient": 0.0017,
+      "odds_ratio": 1.0017,
+      "std_err": null,
+      "p_value": null
+    },
+    "monthly_charges": {
+      "coefficient": 0.8081,
+      "odds_ratio": 2.2436,
+      "std_err": null,
+      "p_value": null
+    },
+    "total_charges": {
+      "coefficient": -0.1446,
+      "odds_ratio": 0.8654,
+      "std_err": null,
+      "p_value": null
+    },
+    "num_products": {
+      "coefficient": 0.013,
+      "odds_ratio": 1.0131,
+      "std_err": null,
+      "p_value": null
+    },
+    "has_premium": {
+      "coefficient": 0.0,
+      "odds_ratio": 1.0,
+      "std_err": null,
+      "p_value": null
+    },
+    "satisfaction_score": {
+      "coefficient": 0.064,
+      "odds_ratio": 1.0661,
+      "std_err": null,
+      "p_value": null
+    }
+  },
+  "model_info": {
+    "intercept": 0.0279,
+    "n_features": 7,
+    "n_samples": 200,
+    "n_positive": 54,
+    "n_negative": 146
+  },
+  "confusion_matrix": [
+    [
+      146,
+      0
+    ],
+    [
+      0,
+      54
+    ]
+  ],
+  "figures": [
+    {
+      "filename": "roc_curve.png",
+      "relative_path": "figures/roc_curve.png",
+      "type": "roc_curve",
+      "description": "ROC 曲線 - 模型區分能力"
+    },
+    {
+      "filename": "confusion_matrix.png",
+      "relative_path": "figures/confusion_matrix.png",
+      "type": "confusion_matrix",
+      "description": "混淆矩陣 - 預測準確度"
+    },
+    {
+      "filename": "coefficients.png",
+      "relative_path": "figures/coefficients.png",
+      "type": "coefficients",
+      "description": "係數圖 - 變數影響力"
+    }
+  ],
+  "summary": {
+    "sample_size": 200,
+    "outcome_variable": "churned",
+    "variables_used": [
+      "age",
+      "tenure_months",
+      "monthly_charges",
+      "total_charges",
+      "num_products",
+      "has_premium",
+      "satisfaction_score"
+    ],
+    "n_variables": 7,
+    "expected_insights": [
+      "滿意度評分是流失的最強預測因子",
+      "合約月數較短的客戶流失風險較高",
+      "高級會員的流失率顯著較低",
+      "月費用與流失呈正相關",
+      "使用多項產品的客戶較不易流失"
+    ]
+  }
+}

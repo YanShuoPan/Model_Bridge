@@ -132,6 +132,38 @@ export default function Home() {
             assistantContent += `• ${o}\n`;
           });
 
+          // 【新增】顯示預執行結果
+          if (method.pre_run_results && method.result_explanation) {
+            const preRun = method.pre_run_results;
+
+            assistantContent += `\n---\n\n### 📊 範例執行結果\n\n`;
+            assistantContent += `**${preRun.example_name}** (${preRun.summary.sample_size} 筆資料)\n\n`;
+
+            // 顯示 GPT 生成的解釋
+            assistantContent += `${method.result_explanation}\n\n`;
+
+            // 顯示關鍵指標
+            assistantContent += `**關鍵指標：**\n`;
+            Object.entries(preRun.metrics).forEach(([key, value]) => {
+              const displayName = key === 'accuracy' ? '準確率' :
+                                  key === 'auc' ? 'AUC' :
+                                  key === 'precision' ? '精確率' :
+                                  key === 'recall' ? '召回率' : key;
+              assistantContent += `• ${displayName}: ${value}\n`;
+            });
+
+            // 顯示圖表（提供查看連結）
+            if (preRun.figures && preRun.figures.length > 0) {
+              assistantContent += `\n**視覺化圖表：**\n`;
+              preRun.figures.forEach((fig: any) => {
+                // 使用後端的靜態文件路徑
+                const figPath = `backend/knowledge_base/methods/${preRun.method_id}/examples/${preRun.example_id}/pre_run_results/${fig.relative_path}`;
+                assistantContent += `• ${fig.description}\n`;
+              });
+              assistantContent += `\n*（圖表已預先生成，展示實際分析結果）*\n`;
+            }
+          }
+
           // 範例資料展示
           if (method.example_data && analysis.show_example) {
             const exData = method.example_data;

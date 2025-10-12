@@ -18,20 +18,47 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "你好！我是統計方法諮詢助手。\n\n我可以幫助你：\n• 理解統計問題\n• 推薦適合的統計方法\n• 說明方法的使用時機與注意事項\n\n請告訴我你的研究問題，或點擊下方的範例問題開始。"
+      content: "你好！我是統計方法諮詢助手。\n\n我可以幫助你：\n• 理解統計問題\n• 推薦適合的統計方法\n• 說明方法的使用時機與注意事項\n\n⏱️ 提示：首次訪問時，後端需要約 30 秒啟動，請稍候片刻。\n\n請告訴我你的研究問題，或點擊下方的範例問題開始。"
     }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [examples, setExamples] = useState<ExampleQuestion[]>([]);
+  const [loadingExamples, setLoadingExamples] = useState(true);
+  const [apiReady, setApiReady] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 載入範例問題
+  // 載入範例問題（帶超時和重試）
   useEffect(() => {
-    fetch(`${API_BASE}/chat/examples`)
-      .then(res => res.json())
-      .then(data => setExamples(data.examples || []))
-      .catch(err => console.error("載入範例失敗:", err));
+    const loadExamples = async () => {
+      try {
+        setLoadingExamples(true);
+
+        // 設置 30 秒超時
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+        const response = await fetch(`${API_BASE}/chat/examples`, {
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          setExamples(data.examples || []);
+          setApiReady(true);
+        }
+      } catch (err) {
+        console.error("載入範例失敗:", err);
+        // 即使失敗也設為 ready，讓用戶可以手動輸入
+        setApiReady(true);
+      } finally {
+        setLoadingExamples(false);
+      }
+    };
+
+    loadExamples();
   }, []);
 
   // 自動滾動到底部
@@ -193,9 +220,35 @@ export default function Home() {
         <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 600 }}>
           統計方法諮詢助手
         </h1>
-        <p style={{ margin: "4px 0 0", fontSize: "14px", color: "#6b7280" }}>
-          AI 驅動的統計方法推薦系統
-        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+          <p style={{ margin: 0, fontSize: "14px", color: "#6b7280" }}>
+            AI 驅動的統計方法推薦系統
+          </p>
+          {loadingExamples && (
+            <span style={{
+              fontSize: "12px",
+              color: "#f59e0b",
+              fontWeight: 500,
+              padding: "2px 8px",
+              backgroundColor: "#fef3c7",
+              borderRadius: "4px"
+            }}>
+              🔄 正在連接後端...
+            </span>
+          )}
+          {!loadingExamples && apiReady && (
+            <span style={{
+              fontSize: "12px",
+              color: "#10b981",
+              fontWeight: 500,
+              padding: "2px 8px",
+              backgroundColor: "#d1fae5",
+              borderRadius: "4px"
+            }}>
+              ✓ 已就緒
+            </span>
+          )}
+        </div>
       </header>
 
       {/* 對話區域 */}
@@ -242,42 +295,54 @@ export default function Home() {
       </div>
 
       {/* 範例問題區域 */}
-      {examples.length > 0 && messages.length <= 1 && (
+      {messages.length <= 1 && (
         <div style={{
           padding: "16px 24px",
           borderTop: "1px solid #e5e7eb",
           backgroundColor: "#f9fafb"
         }}>
-          <div style={{ fontSize: "14px", color: "#6b7280", marginBottom: "12px" }}>
-            💡 範例問題（點擊試試）：
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-            {examples.map((ex, idx) => (
-              <button
-                key={idx}
-                onClick={() => sendMessage(ex.question)}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  backgroundColor: "#ffffff",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f3f4f6";
-                  e.currentTarget.style.borderColor = "#3b82f6";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = "#ffffff";
-                  e.currentTarget.style.borderColor = "#d1d5db";
-                }}
-              >
-                {ex.question}
-              </button>
-            ))}
-          </div>
+          {loadingExamples ? (
+            <div style={{ fontSize: "14px", color: "#6b7280", textAlign: "center" }}>
+              🔄 正在載入範例問題...（後端啟動中，請稍候）
+            </div>
+          ) : examples.length > 0 ? (
+            <>
+              <div style={{ fontSize: "14px", color: "#6b7280", marginBottom: "12px" }}>
+                💡 範例問題（點擊試試）：
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {examples.map((ex, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => sendMessage(ex.question)}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      border: "1px solid #d1d5db",
+                      backgroundColor: "#ffffff",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f3f4f6";
+                      e.currentTarget.style.borderColor = "#3b82f6";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = "#ffffff";
+                      e.currentTarget.style.borderColor = "#d1d5db";
+                    }}
+                  >
+                    {ex.question}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: "14px", color: "#6b7280", textAlign: "center" }}>
+              範例問題載入失敗，但你仍可以直接輸入問題 👇
+            </div>
+          )}
         </div>
       )}
 
@@ -292,34 +357,36 @@ export default function Home() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && sendMessage(input)}
-            placeholder="輸入你的統計問題..."
-            disabled={loading}
+            onKeyPress={(e) => e.key === "Enter" && !loadingExamples && sendMessage(input)}
+            placeholder={loadingExamples ? "後端啟動中，請稍候..." : "輸入你的統計問題..."}
+            disabled={loading || loadingExamples}
             style={{
               flex: 1,
               padding: "12px 16px",
               border: "1px solid #d1d5db",
               borderRadius: "8px",
               fontSize: "14px",
-              outline: "none"
+              outline: "none",
+              backgroundColor: loadingExamples ? "#f9fafb" : "#ffffff",
+              cursor: loadingExamples ? "not-allowed" : "text"
             }}
           />
           <button
             onClick={() => sendMessage(input)}
-            disabled={loading || !input.trim()}
+            disabled={loading || loadingExamples || !input.trim()}
             style={{
               padding: "12px 24px",
-              backgroundColor: loading || !input.trim() ? "#d1d5db" : "#3b82f6",
+              backgroundColor: loading || loadingExamples || !input.trim() ? "#d1d5db" : "#3b82f6",
               color: "#ffffff",
               border: "none",
               borderRadius: "8px",
               fontSize: "14px",
               fontWeight: 600,
-              cursor: loading || !input.trim() ? "not-allowed" : "pointer",
+              cursor: loading || loadingExamples || !input.trim() ? "not-allowed" : "pointer",
               transition: "background-color 0.2s"
             }}
           >
-            {loading ? "發送中..." : "發送"}
+            {loadingExamples ? "啟動中..." : loading ? "發送中..." : "發送"}
           </button>
         </div>
       </div>

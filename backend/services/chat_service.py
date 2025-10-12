@@ -296,14 +296,14 @@ def load_pre_run_results(method_id: str, example_id: Optional[str] = None) -> Op
                     example_id = example_dirs[0].name
 
         if not example_id:
-            print(f"[載入預執行結果] 未找到 {method_id} 的範例")
+            print(f"[Load Pre-run Results] No example found for {method_id}")
             return None
 
         # 讀取 results.json
         results_path = Path(f"backend/knowledge_base/methods/{method_id}/examples/{example_id}/pre_run_results/results.json")
 
         if not results_path.exists():
-            print(f"[載入預執行結果] 結果文件不存在: {results_path}")
+            print(f"[Load Pre-run Results] File not found: {results_path}")
             return None
 
         with open(results_path, 'r', encoding='utf-8') as f:
@@ -317,11 +317,11 @@ def load_pre_run_results(method_id: str, example_id: Optional[str] = None) -> Op
         else:
             results["interpretation_guide"] = ""
 
-        print(f"[載入預執行結果] 成功載入 {method_id}/{example_id}")
+        print(f"[Load Pre-run Results] Success: {method_id}/{example_id}")
         return results
 
     except Exception as e:
-        print(f"[載入預執行結果] 失敗: {e}")
+        print(f"[Load Pre-run Results] Failed: {e}")
         return None
 
 
@@ -386,11 +386,11 @@ def generate_result_explanation(results: Dict[str, Any]) -> str:
         )
 
         explanation = response.choices[0].message.content.strip()
-        print(f"[生成結果解釋] 成功生成 {len(explanation)} 字解釋")
+        print(f"[Generate Explanation] Success: {len(explanation)} chars")
         return explanation
 
     except Exception as e:
-        print(f"[生成結果解釋] 失敗: {e}")
+        print(f"[Generate Explanation] Failed: {e}")
         return "這個範例展示了如何使用統計方法進行數據分析，並提供了實際的執行結果和解釋。"
 
 
@@ -407,7 +407,7 @@ def generate_chat_response(question: str) -> Dict[str, Any]:
     # 先判斷問題類型
     question_type = detect_question_type(question)
 
-    print(f"[問題類型] {question_type}: {question}")
+    print(f"[Question Type] {question_type}")
 
     # 如果不是方法推薦問題，直接回答
     if question_type in ["explanation", "how_to", "general"]:
@@ -444,9 +444,9 @@ def generate_chat_response(question: str) -> Dict[str, Any]:
                 method_info["pre_run_results"] = pre_run_results
                 method_info["result_explanation"] = result_explanation
 
-                print(f"[推薦方法] 已包含預執行結果和解釋")
+                print(f"[Recommend Method] Included pre-run results and explanation")
             else:
-                print(f"[推薦方法] 未找到預執行結果，使用原始資訊")
+                print(f"[Recommend Method] No pre-run results found, using default info")
 
             response["recommended_methods"] = [{
                 "method_id": recommended_method_id,

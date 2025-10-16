@@ -26,6 +26,21 @@ def recommend_methods(task: str, y_type: str, roles: dict, question: str = "", d
             "assumptions": ["可觀測性(ignorability)或正確指定的任一模型", "overlap"],
             "inputs_required": ["treatment(0/1)", "outcome", "covariates"]
         })
+
+    # 高維度變數選擇 (OGA-HDIC)
+    if y_type == "continuous" and roles.get("y") and df_info:
+        n_samples = df_info.get("n_rows", 0)
+        n_features = df_info.get("n_cols", 0) - 1  # 扣除結果變數
+        # 當變數數量相對於樣本數較多時，推薦高維度方法
+        if n_features > n_samples * 0.3:  # p > n * 0.3 視為高維度情境
+            recs.append({
+                "method_id": "oga_hdic",
+                "name": "OGA-HDIC (高維度變數選擇)",
+                "why": f"偵測到高維度問題（{n_features} 個變數 vs {n_samples} 筆樣本），適合使用變數選擇方法進行特徵篩選。",
+                "assumptions": ["真實模型是稀疏的（只有少數變數真正重要）", "線性關係", "樣本獨立"],
+                "inputs_required": ["y(連續)", "多個預測變數X"]
+            })
+
     if y_type == "binary" and roles.get("y"):
         recs.append({
             "method_id": "logistic_regression",

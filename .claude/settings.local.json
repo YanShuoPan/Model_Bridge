@@ -12,7 +12,11 @@
       "Bash(cat:*)",
       "Bash(git rm:*)",
       "Bash(python:*)",
-      "Bash(git checkout:*)"
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(pip install:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

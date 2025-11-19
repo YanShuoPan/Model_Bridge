@@ -1,0 +1,80 @@
+{
+  "example_id": "customer_churn",
+  "example_name": "Customer Churn Prediction",
+  "example_name_zh": "客戶流失預測分析",
+  "description": "分析電信公司客戶流失的影響因素，建立預測模型以提前識別高風險客戶",
+  "difficulty": "beginner",
+  "estimated_time_minutes": 5,
+  "data_source": "data.csv",
+  "data_description": {
+    "rows": 500,
+    "columns": 8,
+    "outcome_variable": "churned (0=留存, 1=流失)",
+    "predictors": [
+      "age: 客戶年齡",
+      "tenure_months: 合約月數",
+      "monthly_charges: 月費用 (美元)",
+      "total_charges: 總費用 (美元)",
+      "num_products: 使用產品數",
+      "has_premium: 是否為高級會員 (0/1)",
+      "satisfaction_score: 滿意度評分 (1-10)"
+    ]
+  },
+  "roles": {
+    "y": "churned",
+    "X": ["age", "tenure_months", "monthly_charges", "total_charges", "num_products", "has_premium", "satisfaction_score"]
+  },
+  "parameters": {
+    "test_size": 0.3,
+    "random_state": 42,
+    "solver": "lbfgs",
+    "max_iter": 1000
+  },
+  "learning_objectives": [
+    "理解邏輯迴歸的基本概念與應用",
+    "學會解讀迴歸係數與勝算比 (Odds Ratio)",
+    "掌握模型評估指標 (準確率、AUC、混淆矩陣)",
+    "了解如何選擇適當的決策閾值",
+    "認識客戶流失預測的實務應用"
+  ],
+  "expected_insights": [
+    "滿意度評分是流失的最強預測因子",
+    "合約月數較短的客戶流失風險較高",
+    "高級會員的流失率顯著較低",
+    "月費用與流失呈正相關",
+    "使用多項產品的客戶較不易流失"
+  ],
+  "business_context": {
+    "scenario": "你是一家電信公司的數據分析師，公司希望降低客戶流失率。你需要建立一個預測模型來識別高風險客戶，以便提前採取挽留措施。",
+    "stakeholders": ["行銷部門", "客戶服務團隊", "產品經理"],
+    "business_questions": [
+      "哪些因素最影響客戶流失？",
+      "如何識別高風險客戶？",
+      "應該優先挽留哪些客戶？",
+      "預測準確度如何？"
+    ],
+    "action_items": [
+      "對高風險客戶提供優惠方案",
+      "改善低滿意度客戶的服務體驗",
+      "推廣產品組合以增加黏著度",
+      "針對新客戶加強關係維護"
+    ]
+  },
+  "interpretation_notes": {
+    "key_findings": "本範例將展示如何：\n1. 識別流失的關鍵驅動因素\n2. 量化各因素的影響大小\n3. 建立風險評分系統\n4. 評估模型的預測能力\n5. 選擇適當的業務決策閾值",
+    "cautions": [
+      "樣本數據為模擬數據，僅供教學使用",
+      "實務中應考慮更多變數（如客服互動、競爭對手）",
+      "需定期更新模型以反映市場變化",
+      "預測結果應結合業務判斷使用"
+    ]
+  },
+  "next_steps": [
+    "嘗試添加交互作用項 (如 tenure × satisfaction)",
+    "探索非線性轉換 (如對數、多項式)",
+    "比較其他方法 (決策樹、隨機森林)",
+    "使用 SMOTE 處理類別不平衡",
+    "進行成本效益分析"
+  ],
+  "tags": ["business", "classification", "customer_analytics", "beginner_friendly"]
+}

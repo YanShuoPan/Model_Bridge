@@ -1,0 +1,179 @@
+{
+  "method_id": "dr_ate_cbps",
+  "name": "Doubly Robust ATE (CBPS-like weights)",
+  "name_zh": "雙重穩健平均處置效應估計",
+  "category": "causal_inference",
+  "subcategory": "treatment_effect",
+  "tags": ["causal", "ATE", "doubly_robust", "propensity_score", "CBPS", "treatment_effect"],
+  "domains": [
+    {
+      "domain_id": "causal_inference",
+      "relevance": "primary",
+      "weight": 1.0,
+      "reason": "此方法的核心目的就是估計因果效應（平均處置效應 ATE）"
+    },
+    {
+      "domain_id": "regression",
+      "relevance": "secondary",
+      "weight": 0.5,
+      "reason": "使用迴歸模型估計結果模型和傾向分數模型"
+    },
+    {
+      "domain_id": "bayesian",
+      "relevance": "applicable",
+      "weight": 0.3,
+      "reason": "可以擴展為貝氏雙重穩健估計來量化不確定性"
+    }
+  ],
+  "difficulty": "advanced",
+  "computational_complexity": "medium",
+  "requires": {
+    "task": ["causal"],
+    "y_type": ["continuous", "binary"],
+    "treatment_type": "binary",
+    "min_samples": 100,
+    "data_requirements": {
+      "treatment": "Binary treatment variable (0/1)",
+      "outcome": "Continuous or binary outcome",
+      "covariates": "Baseline covariates for confounding adjustment",
+      "sample_size": "At least 100 observations, preferably more for stable estimation"
+    }
+  },
+  "assumptions": [
+    "可觀測性假設 (Ignorability/Unconfoundedness): 給定觀測到的共變數後，處置分配與潛在結果獨立",
+    "重疊性假設 (Overlap/Positivity): 每個觀測值在給定共變數下都有正機率接受處置或控制",
+    "一致性假設 (Consistency): 觀測到的結果等於對應處置下的潛在結果",
+    "穩定單元處置值假設 (SUTVA): 一個單元的處置不影響其他單元的結果",
+    "模型設定: 至少一個模型（結果模型或傾向分數模型）需要正確設定"
+  ],
+  "when_to_use": {
+    "best_for": [
+      "評估政策或介入措施的因果效應",
+      "觀察性研究中需要控制混淆因子",
+      "需要穩健的因果推論（即使某一模型設定錯誤）",
+      "處置分配非隨機但有豐富的基線共變數"
+    ],
+    "scenarios": [
+      "政策評估：教育政策、勞動市場政策對結果的影響",
+      "醫學研究：藥物或治療的效果評估（觀察性數據）",
+      "經濟學：就業培訓、補助計畫的效果",
+      "行銷：促銷活動、廣告投放的因果效果",
+      "社會科學：社會介入措施的影響評估"
+    ]
+  },
+  "limitations": [
+    "無法處理未觀測到的混淆因子（隱藏偏誤）",
+    "需要足夠的樣本數來確保重疊性假設成立",
+    "極端傾向分數（接近 0 或 1）可能導致估計不穩定",
+    "因果假設無法從數據直接驗證，需要領域知識支持",
+    "僅適用於二元處置，多值處置需要擴展方法"
+  ],
+  "interpretation_guide": {
+    "ATE": {
+      "description": "平均處置效應 (Average Treatment Effect)",
+      "interpretation": "所有個體從不接受處置改為接受處置的平均結果變化",
+      "example": "若 ATE = 5.2，表示接受處置使結果平均增加 5.2 單位",
+      "caution": "ATE 是平均效果，個體效果可能有異質性"
+    },
+    "confidence_interval": {
+      "description": "95% 信賴區間",
+      "interpretation": "ATE 真實值有 95% 機率落在此區間",
+      "significance": "若區間不包含 0，則表示處置效應顯著"
+    },
+    "balance_diagnostics": {
+      "SMD": {
+        "description": "標準化平均差異 (Standardized Mean Difference)",
+        "threshold": "一般認為 SMD < 0.1 表示平衡良好",
+        "interpretation": "衡量處置組與對照組在共變數上的差異"
+      },
+      "before_vs_after": "比較加權前後的 SMD，確認 CBPS 權重改善了平衡"
+    },
+    "practical_tips": [
+      "檢查重疊性：確認傾向分數分佈有足夠重疊",
+      "敏感性分析：評估對未觀測混淆因子的敏感性",
+      "報告完整資訊：ATE、信賴區間、平衡診斷",
+      "領域知識檢驗：結果是否符合理論預期",
+      "考慮異質處置效應：不同亞群可能有不同效果"
+    ]
+  },
+  "output_description": {
+    "metrics": {
+      "ATE": "平均處置效應估計值",
+      "SE": "標準誤",
+      "CI_lower": "95% 信賴區間下界",
+      "CI_upper": "95% 信賴區間上界",
+      "p_value": "雙尾檢定 p 值",
+      "SMD_before": "加權前的標準化平均差異",
+      "SMD_after": "加權後的標準化平均差異"
+    },
+    "plots": {
+      "balance_plot": "共變數平衡診斷圖（加權前後 SMD 比較）",
+      "propensity_distribution": "傾向分數分佈圖（檢查重疊性）"
+    },
+    "report": "完整的因果推論分析報告，包含效應估計、平衡診斷與解釋"
+  },
+  "related_methods": [
+    {
+      "method_id": "inverse_propensity_weighting",
+      "relation": "相關方法，僅使用傾向分數加權",
+      "when_to_prefer": "當確信傾向分數模型設定正確時"
+    },
+    {
+      "method_id": "regression_adjustment",
+      "relation": "相關方法，僅使用結果模型迴歸",
+      "when_to_prefer": "當確信結果模型設定正確時"
+    },
+    {
+      "method_id": "matching",
+      "relation": "替代方法，透過配對控制混淆",
+      "when_to_prefer": "當樣本數不大且需要可解釋性時"
+    },
+    {
+      "method_id": "instrumental_variable",
+      "relation": "替代方法，處理未觀測混淆",
+      "when_to_prefer": "當存在有效工具變數且懷疑有未觀測混淆時"
+    }
+  ],
+  "references": [
+    {
+      "type": "article",
+      "title": "Doubly Robust Estimation in Missing Data and Causal Inference Models",
+      "authors": "Bang, H., & Robins, J. M.",
+      "journal": "Biometrics",
+      "year": 2005,
+      "volume": 61,
+      "pages": "962-973"
+    },
+    {
+      "type": "article",
+      "title": "Covariate Balancing Propensity Score",
+      "authors": "Imai, K., & Ratkovic, M.",
+      "journal": "Journal of the Royal Statistical Society, Series B",
+      "year": 2014,
+      "volume": 76,
+      "pages": "243-263"
+    },
+    {
+      "type": "book",
+      "title": "Causal Inference: What If",
+      "authors": "Hernán, M. A., & Robins, J. M.",
+      "year": 2020,
+      "publisher": "Chapman & Hall/CRC"
+    }
+  ],
+  "author": {
+    "name": "Platform Development Team",
+    "email": "dev@ai-agent-stat.com",
+    "institution": "AI Agent Statistics Platform",
+    "role": "core_developer"
+  },
+  "version": "1.0.0",
+  "status": "stable",
+  "last_updated": "2025-01-19",
+  "implementation": {
+    "language": "Python",
+    "library": "custom + statsmodels",
+    "class": "DrAteCbps",
+    "file_path": "backend/methods/dr_ate_cbps/method.py"
+  }
+}

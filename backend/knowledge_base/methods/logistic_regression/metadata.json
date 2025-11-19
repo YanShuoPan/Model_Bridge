@@ -1,0 +1,175 @@
+{
+  "method_id": "logistic_regression",
+  "name": "Logistic Regression",
+  "name_zh": "邏輯迴歸",
+  "category": "classification",
+  "subcategory": "binary_classification",
+  "tags": ["supervised", "binary", "interpretable", "parametric", "generalized_linear_model"],
+  "domains": [
+    {
+      "domain_id": "classification",
+      "relevance": "primary",
+      "weight": 1.0,
+      "reason": "邏輯迴歸的核心功能就是二元分類問題"
+    },
+    {
+      "domain_id": "regression",
+      "relevance": "secondary",
+      "weight": 0.6,
+      "reason": "屬於廣義線性模型的一種，使用迴歸框架建模"
+    },
+    {
+      "domain_id": "machine_learning",
+      "relevance": "applicable",
+      "weight": 0.4,
+      "reason": "是基礎的監督式學習方法，常用於機器學習流程"
+    }
+  ],
+  "difficulty": "beginner",
+  "computational_complexity": "low",
+  "requires": {
+    "task": ["classification", "prediction"],
+    "y_type": ["binary"],
+    "min_samples": 30,
+    "data_requirements": {
+      "outcome": "Binary variable (0/1)",
+      "predictors": "Numeric or categorical variables",
+      "sample_size": "At least 10-15 events per predictor"
+    }
+  },
+  "assumptions": [
+    "結果變數為二元 (0/1)",
+    "對數勝算(log-odds)與自變數呈線性關係",
+    "觀測值之間相互獨立",
+    "自變數之間無嚴重多元共線性",
+    "極端值或影響點不過多"
+  ],
+  "when_to_use": {
+    "best_for": [
+      "預測二元結果（如：是否購買、是否流失、是否發病）",
+      "了解各因素對結果的影響方向與強度",
+      "需要模型可解釋性的情況",
+      "建立風險評分模型"
+    ],
+    "scenarios": [
+      "醫療：疾病診斷或風險預測",
+      "商業：客戶流失預測、信用評分",
+      "社會科學：投票行為、政策支持度",
+      "行銷：廣告點擊、轉換率預測"
+    ]
+  },
+  "limitations": [
+    "假設對數勝算與自變數為線性關係，無法自動捕捉複雜非線性效應",
+    "對離群值和極端值較敏感",
+    "當預測變數過多且樣本不足時容易過度配適",
+    "僅適用於二元結果，多類別需使用其他變體"
+  ],
+  "interpretation_guide": {
+    "coefficients": {
+      "raw_coefficient": "自變數每增加一單位，對數勝算(log-odds)的改變量",
+      "odds_ratio": "係數的指數值(exp(β))，表示勝算比(Odds Ratio)。OR > 1 表示正向關係，OR < 1 表示負向關係",
+      "example": "若 OR = 2.5，表示該變數每增加一單位，事件發生的勝算增加為原本的 2.5 倍"
+    },
+    "metrics": {
+      "accuracy": {
+        "description": "整體預測準確率 = (TP + TN) / Total",
+        "interpretation": "0.7 表示 70% 的預測是正確的",
+        "caution": "在類別不平衡時可能誤導"
+      },
+      "AUC_ROC": {
+        "description": "ROC 曲線下面積，衡量模型區分能力",
+        "scale": "0.5 = 隨機猜測，1.0 = 完美分類",
+        "interpretation": ">0.8 為良好，>0.9 為優秀"
+      },
+      "precision": {
+        "description": "精確率 = TP / (TP + FP)",
+        "interpretation": "在所有預測為正的樣本中，實際為正的比例"
+      },
+      "recall": {
+        "description": "召回率 = TP / (TP + FN)",
+        "interpretation": "在所有實際為正的樣本中，被正確預測的比例"
+      }
+    },
+    "practical_tips": [
+      "檢查係數的顯著性（p-value < 0.05）",
+      "報告勝算比(OR)及其 95% 信賴區間",
+      "使用 ROC 曲線選擇最佳決策閾值",
+      "進行模型診斷（殘差分析、影響點檢測）",
+      "考慮交互作用項和非線性轉換"
+    ]
+  },
+  "output_description": {
+    "metrics": {
+      "coefficients": "各變數的迴歸係數",
+      "odds_ratios": "勝算比及信賴區間",
+      "accuracy": "準確率",
+      "precision": "精確率",
+      "recall": "召回率",
+      "f1_score": "F1 分數",
+      "auc_roc": "ROC AUC",
+      "confusion_matrix": "混淆矩陣"
+    },
+    "plots": {
+      "roc_curve": "ROC 曲線圖",
+      "coefficient_plot": "係數森林圖（如適用）",
+      "residual_plot": "殘差診斷圖（如適用）"
+    },
+    "report": "完整的 HTML 分析報告，包含結果解釋與建議"
+  },
+  "related_methods": [
+    {
+      "method_id": "probit_regression",
+      "relation": "類似方法，使用不同的連結函數",
+      "when_to_prefer": "當假設誤差服從常態分佈時"
+    },
+    {
+      "method_id": "random_forest",
+      "relation": "替代方法，可處理非線性",
+      "when_to_prefer": "當關係複雜且不需強解釋性時"
+    },
+    {
+      "method_id": "lasso_logistic",
+      "relation": "擴展方法，加入正規化",
+      "when_to_prefer": "當預測變數很多需要變數選擇時"
+    }
+  ],
+  "references": [
+    {
+      "type": "book",
+      "title": "Applied Logistic Regression",
+      "authors": "Hosmer, D.W., Lemeshow, S., & Sturdivant, R.X.",
+      "year": 2013,
+      "edition": "3rd",
+      "publisher": "Wiley"
+    },
+    {
+      "type": "article",
+      "title": "Regression Models and Life-Tables",
+      "authors": "Cox, D.R.",
+      "journal": "Journal of the Royal Statistical Society, Series B",
+      "year": 1972,
+      "volume": 34,
+      "pages": "187-220"
+    },
+    {
+      "type": "online",
+      "title": "Logistic Regression - scikit-learn documentation",
+      "url": "https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression"
+    }
+  ],
+  "author": {
+    "name": "Platform Development Team",
+    "email": "dev@ai-agent-stat.com",
+    "institution": "AI Agent Statistics Platform",
+    "role": "core_developer"
+  },
+  "version": "1.0.0",
+  "status": "stable",
+  "last_updated": "2024-10-09",
+  "implementation": {
+    "language": "Python",
+    "library": "scikit-learn",
+    "class": "sklearn.linear_model.LogisticRegression",
+    "file_path": "backend/methods/logistic_regression.py"
+  }
+}

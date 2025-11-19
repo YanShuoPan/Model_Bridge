@@ -1,0 +1,193 @@
+{
+  "method_id": "oga_hdic",
+  "name": "OGA-HDIC (高維度變數選擇)",
+  "name_zh": "正交貪婪演算法與高維度資訊準則",
+  "category": "high_dimensional",
+  "subcategory": "variable_selection",
+  "tags": ["high_dimensional", "variable_selection", "sparse", "regularization", "OGA", "HDIC", "feature_selection"],
+  "domains": [
+    {
+      "domain_id": "high_dimensional",
+      "relevance": "primary",
+      "weight": 1.0,
+      "reason": "專門設計用於處理高維度問題（p >> n）的變數選擇方法"
+    },
+    {
+      "domain_id": "regression",
+      "relevance": "primary",
+      "weight": 0.9,
+      "reason": "在線性迴歸框架下進行變數篩選，最終目標是建立預測模型"
+    },
+    {
+      "domain_id": "machine_learning",
+      "relevance": "secondary",
+      "weight": 0.5,
+      "reason": "屬於特徵選擇的範疇，常用於機器學習前處理"
+    }
+  ],
+  "difficulty": "advanced",
+  "computational_complexity": "medium_to_high",
+  "requires": {
+    "task": ["regression", "variable_selection"],
+    "y_type": ["continuous"],
+    "min_samples": 50,
+    "data_requirements": {
+      "outcome": "Continuous variable",
+      "predictors": "Many predictors (p >= n or p > 0.3n recommended)",
+      "sample_size": "At least 50 observations",
+      "sparsity_assumption": "True model assumed to be sparse (only a few variables truly important)"
+    }
+  },
+  "assumptions": [
+    "稀疏性假設：真實模型中只有少數變數是重要的（大部分係數為 0 或接近 0）",
+    "線性關係：結果變數與自變數之間為線性關係",
+    "樣本獨立：觀測值之間相互獨立",
+    "高維度情境：變數數量相對於樣本數較大（建議 p > 0.3n）",
+    "預測變數不過度共線：雖然可處理一定程度的共線性，但極端多元共線性仍會影響結果"
+  ],
+  "when_to_use": {
+    "best_for": [
+      "高維度數據分析（變數遠多於樣本）",
+      "特徵篩選與降維（從大量候選變數中找出重要變數）",
+      "稀疏線性模型建立",
+      "預測準確性與可解釋性兼顧的情境"
+    ],
+    "scenarios": [
+      "基因體學：從數千個基因中找出與疾病相關的基因",
+      "經濟學：高維度宏觀經濟變數篩選",
+      "金融：大量風險因子中識別關鍵因子",
+      "醫學研究：從多重生物標記中篩選預測因子",
+      "文字探勘：從大量詞彙特徵中選擇重要詞彙"
+    ]
+  },
+  "limitations": [
+    "僅適用於連續型結果變數（二元或類別結果需使用其他方法）",
+    "假設線性關係，無法自動捕捉複雜非線性效應",
+    "對極端離群值敏感",
+    "計算時間隨變數數量增加而增加",
+    "選擇的變數集合可能因樣本變動而不穩定"
+  ],
+  "interpretation_guide": {
+    "selected_variables": {
+      "description": "被選入模型的變數列表",
+      "interpretation": "這些變數對預測結果有顯著貢獻",
+      "caution": "選擇結果可能因樣本而異，建議搭配穩定性分析"
+    },
+    "coefficients": {
+      "description": "選中變數的迴歸係數",
+      "interpretation": "變數每增加一單位，結果變數的預期變化量",
+      "example": "若係數為 2.5，表示該變數每增加 1，結果平均增加 2.5"
+    },
+    "model_performance": {
+      "MSE": {
+        "description": "均方誤差 (Mean Squared Error)",
+        "interpretation": "預測誤差的平方平均值，越小越好",
+        "scale": "單位與結果變數相同的平方"
+      },
+      "R_squared": {
+        "description": "決定係數",
+        "interpretation": "模型解釋的變異比例",
+        "scale": "0 到 1 之間，越接近 1 表示配適越好"
+      },
+      "HDIC": {
+        "description": "高維度資訊準則",
+        "interpretation": "用於模型選擇的準則，平衡配適度與模型複雜度",
+        "note": "演算法自動選擇 HDIC 最小的模型"
+      }
+    },
+    "practical_tips": [
+      "檢查選中變數的合理性（是否符合領域知識）",
+      "進行穩定性分析（如 bootstrap 重抽樣）",
+      "注意過度配適：若選中過多變數，考慮調整參數或使用交叉驗證",
+      "報告完整資訊：選中變數、係數、模型性能指標",
+      "若需要更強的解釋性，可考慮只使用前幾個最重要的變數"
+    ]
+  },
+  "output_description": {
+    "metrics": {
+      "selected_vars": "選中的變數名稱列表",
+      "coefficients": "各選中變數的迴歸係數",
+      "MSE": "均方誤差",
+      "R_squared": "決定係數",
+      "HDIC": "高維度資訊準則值",
+      "n_selected": "選中的變數數量",
+      "selection_rate": "變數選擇比例 (n_selected / p)"
+    },
+    "plots": {
+      "coefficient_plot": "係數圖（選中變數的係數及信賴區間）",
+      "variable_importance": "變數重要性排序圖",
+      "residual_plot": "殘差圖（診斷模型配適）"
+    },
+    "report": "完整的變數選擇分析報告，包含選擇策略、結果解釋與建議"
+  },
+  "related_methods": [
+    {
+      "method_id": "lasso",
+      "relation": "類似方法，使用 L1 正規化進行變數選擇",
+      "when_to_prefer": "當需要更成熟的套件支援或調參經驗豐富時"
+    },
+    {
+      "method_id": "elastic_net",
+      "relation": "類似方法，結合 L1 和 L2 正規化",
+      "when_to_prefer": "當變數間存在群組結構或嚴重共線性時"
+    },
+    {
+      "method_id": "ridge_regression",
+      "relation": "相關方法，使用 L2 正規化但不進行變數選擇",
+      "when_to_prefer": "當不需要變數選擇只需縮減估計時"
+    },
+    {
+      "method_id": "random_forest",
+      "relation": "替代方法，可處理非線性但解釋性較低",
+      "when_to_prefer": "當關係複雜且不強調線性假設時"
+    },
+    {
+      "method_id": "forward_stepwise",
+      "relation": "傳統方法，逐步加入變數",
+      "when_to_prefer": "當 p < n 且需要經典統計推論時"
+    }
+  ],
+  "references": [
+    {
+      "type": "article",
+      "title": "Orthogonal Greedy Algorithm for High-Dimensional Inference",
+      "authors": "Ing, C. K., & Lai, T. L.",
+      "journal": "Proceedings of the National Academy of Sciences",
+      "year": 2011,
+      "volume": 108,
+      "pages": "4816-4821"
+    },
+    {
+      "type": "article",
+      "title": "High-Dimensional Model Selection",
+      "authors": "Fan, J., & Li, R.",
+      "journal": "Journal of the American Statistical Association",
+      "year": 2001,
+      "volume": 96,
+      "pages": "1348-1360"
+    },
+    {
+      "type": "book",
+      "title": "Statistical Learning with Sparsity: The Lasso and Generalizations",
+      "authors": "Hastie, T., Tibshirani, R., & Wainwright, M.",
+      "year": 2015,
+      "publisher": "Chapman & Hall/CRC"
+    }
+  ],
+  "author": {
+    "name": "Platform Development Team",
+    "email": "dev@ai-agent-stat.com",
+    "institution": "AI Agent Statistics Platform",
+    "role": "core_developer"
+  },
+  "version": "1.0.0",
+  "status": "stable",
+  "last_updated": "2025-01-19",
+  "implementation": {
+    "language": "Python",
+    "library": "custom (NumPy, SciPy)",
+    "class": "OGAHDICMethod",
+    "file_path": "backend/methods/oga_hdic/method.py",
+    "algorithm": "Orthogonal Greedy Algorithm with High-Dimensional Information Criterion"
+  }
+}

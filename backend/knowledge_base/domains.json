@@ -1,0 +1,449 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-01-19",
+  "description": "統計方法領域分類定義檔，用於多領域方法推薦系統",
+  "domains": {
+    "high_dimensional": {
+      "name": "高維度統計",
+      "name_en": "High-Dimensional Statistics",
+      "description": "處理變數數量遠大於樣本數 (p >> n) 的統計問題，需要特殊的變數選擇或降維技術",
+      "detailed_description": "在現代數據科學中，特別是基因體學、影像分析等領域，經常遇到特徵數量遠超過樣本數的情況。傳統統計方法在此情境下可能失效，需要使用正規化、變數選擇或降維等技術來處理。",
+      "keywords": [
+        "變數選擇",
+        "降維",
+        "稀疏性",
+        "正規化",
+        "Lasso",
+        "Ridge",
+        "高維度",
+        "p >> n",
+        "特徵篩選",
+        "懲罰迴歸"
+      ],
+      "typical_scenarios": [
+        "基因體學研究：數千個基因但只有數百個樣本",
+        "文字探勘：大量詞彙特徵但樣本有限",
+        "影像分析：高維度像素特徵",
+        "金融風險模型：大量潛在風險因子",
+        "醫學預測：多重生物標記篩選"
+      ],
+      "data_characteristics": {
+        "sample_size": "通常 n < 1000",
+        "feature_count": "p > n 或 p > 0.3n",
+        "sparsity": "真實重要變數通常很少（稀疏性假設）"
+      },
+      "common_challenges": [
+        "過度配適風險高",
+        "傳統統計推論失效",
+        "計算複雜度高",
+        "需要變數篩選策略"
+      ]
+    },
+    "time_series": {
+      "name": "時間序列分析",
+      "name_en": "Time Series Analysis",
+      "description": "分析具有時間順序的數據，考慮時間相依性、趨勢、季節性等特徵",
+      "detailed_description": "時間序列數據的觀測值按時間順序排列，相鄰觀測值通常具有相關性。分析時需要考慮自相關、趨勢、季節性、週期性等時間結構，並處理非定態性問題。",
+      "keywords": [
+        "時間相依",
+        "自相關",
+        "趨勢",
+        "季節性",
+        "預測",
+        "ARIMA",
+        "平滑",
+        "非定態",
+        "時間結構",
+        "動態建模"
+      ],
+      "typical_scenarios": [
+        "經濟指標預測：GDP、失業率、股價",
+        "氣候數據分析：溫度、降雨量變化",
+        "銷售預測：零售業、電商平台",
+        "能源需求預測：電力、天然氣消耗",
+        "疫情趨勢分析：感染人數時間演變"
+      ],
+      "data_characteristics": {
+        "temporal_order": "數據具有時間順序且不可隨意調換",
+        "autocorrelation": "相鄰時間點的觀測值相關",
+        "stationarity": "可能需要檢驗或轉換為定態序列"
+      },
+      "common_challenges": [
+        "處理非定態性（差分、對數轉換）",
+        "識別適當的模型階數",
+        "處理缺失值與異常值",
+        "長期預測不確定性高"
+      ]
+    },
+    "spatial_statistics": {
+      "name": "空間統計",
+      "name_en": "Spatial Statistics",
+      "description": "分析具有地理或空間結構的數據，考慮空間相關性、空間異質性等特徵",
+      "detailed_description": "空間數據具有地理位置資訊，相近位置的觀測值通常具有相似性（空間自相關）。分析時需要考慮空間依賴性、空間異質性、尺度效應等空間特性。",
+      "keywords": [
+        "空間相關",
+        "地理加權",
+        "克利金",
+        "熱點分析",
+        "空間自相關",
+        "GIS",
+        "地理位置",
+        "鄰近效應",
+        "空間插值",
+        "區域分析"
+      ],
+      "typical_scenarios": [
+        "疾病地理分佈：傳染病擴散、癌症發生率",
+        "環境監測：空氣污染、土壤品質",
+        "房地產分析：房價空間分佈",
+        "犯罪熱點分析：犯罪事件地理聚集",
+        "生態學研究：物種分佈、棲地分析"
+      ],
+      "data_characteristics": {
+        "spatial_coordinates": "每筆資料包含經緯度或位置資訊",
+        "spatial_dependence": "鄰近觀測值傾向相似（Tobler 第一定律）",
+        "boundary_effects": "可能存在邊界效應"
+      },
+      "common_challenges": [
+        "處理空間自相關導致的統計推論偏誤",
+        "選擇適當的空間權重矩陣",
+        "處理不規則空間單元",
+        "計算成本高（大型空間資料）"
+      ]
+    },
+    "causal_inference": {
+      "name": "因果推論",
+      "name_en": "Causal Inference",
+      "description": "探討變數間的因果關係，而非僅止於相關性，評估處置或介入的效果",
+      "detailed_description": "因果推論旨在回答「如果改變 X，Y 會如何變化」的問題。透過反事實框架、隨機化實驗或觀察性研究設計（如傾向分數、工具變數），估計處置效應並推論因果關係。",
+      "keywords": [
+        "處置效應",
+        "反事實",
+        "工具變數",
+        "傾向分數",
+        "ATE",
+        "因果關係",
+        "隨機化",
+        "混淆因子",
+        "因果推論",
+        "政策評估"
+      ],
+      "typical_scenarios": [
+        "政策評估：政府政策對經濟、教育的影響",
+        "臨床試驗：藥物或治療的效果評估",
+        "行銷實驗：廣告、促銷活動的因果效果",
+        "社會科學：教育介入、社會政策影響",
+        "流行病學：風險因子與疾病的因果關係"
+      ],
+      "data_characteristics": {
+        "treatment_variable": "明確的處置或介入變數（通常為二元）",
+        "outcome_variable": "感興趣的結果變數",
+        "confounders": "需要控制的混淆因子"
+      },
+      "common_challenges": [
+        "觀察性研究中的混淆偏誤",
+        "選擇偏誤（非隨機分配）",
+        "因果假設無法直接驗證",
+        "需要強有力的識別假設（如可忽略性、overlap）"
+      ]
+    },
+    "classification": {
+      "name": "分類問題",
+      "name_en": "Classification",
+      "description": "預測離散的類別結果，如二元分類或多類別分類",
+      "detailed_description": "分類是監督式學習的核心任務，目標是根據輸入特徵預測觀測值所屬的類別。可以是二元分類（是/否）或多類別分類（A/B/C...）。",
+      "keywords": [
+        "二元分類",
+        "多類別",
+        "判別分析",
+        "分類器",
+        "監督式學習",
+        "類別預測",
+        "決策邊界",
+        "ROC曲線",
+        "混淆矩陣",
+        "準確率"
+      ],
+      "typical_scenarios": [
+        "醫學診斷：疾病有/無、疾病類型判斷",
+        "信用評分：違約/正常",
+        "客戶流失預測：會/不會流失",
+        "垃圾郵件偵測：垃圾郵件/正常郵件",
+        "影像辨識：物體類別識別"
+      ],
+      "data_characteristics": {
+        "outcome_type": "離散類別（binary, nominal, ordinal）",
+        "class_balance": "需注意類別不平衡問題",
+        "decision_boundary": "尋找最佳決策邊界"
+      },
+      "common_challenges": [
+        "類別不平衡導致模型偏向多數類",
+        "過度配適風險",
+        "選擇適當的分類閾值",
+        "多類別問題的複雜性增加"
+      ]
+    },
+    "regression": {
+      "name": "迴歸分析",
+      "name_en": "Regression Analysis",
+      "description": "預測連續數值型的結果變數，探討自變數與因變數的關係",
+      "detailed_description": "迴歸分析是統計學的基礎方法，用於建立自變數與連續型因變數之間的數學模型，可用於預測、解釋變數影響、控制混淆因子等。",
+      "keywords": [
+        "線性迴歸",
+        "非線性",
+        "廣義線性模型",
+        "預測",
+        "關係建模",
+        "連續結果",
+        "迴歸係數",
+        "殘差分析",
+        "變異數解釋",
+        "多元迴歸"
+      ],
+      "typical_scenarios": [
+        "房價預測：根據坪數、地段等預測價格",
+        "銷售額預測：根據廣告費、季節等預測銷售",
+        "學業成就研究：探討教育投入與成績的關係",
+        "醫學研究：劑量-反應關係",
+        "經濟分析：收入、消費與各種因素的關係"
+      ],
+      "data_characteristics": {
+        "outcome_type": "連續數值型變數",
+        "relationship": "通常假設某種函數關係（線性或非線性）",
+        "residuals": "重視殘差的性質（常態性、等變異數）"
+      },
+      "common_challenges": [
+        "多元共線性問題",
+        "異質變異數",
+        "非線性關係的識別",
+        "離群值與影響點的處理"
+      ]
+    },
+    "survival_analysis": {
+      "name": "存活分析",
+      "name_en": "Survival Analysis",
+      "description": "分析時間至事件數據，處理刪失資料，評估風險因子對存活時間的影響",
+      "detailed_description": "存活分析專門處理「時間至事件」數據，特別是當某些個體尚未經歷事件（右設限）時。常用於醫學研究、可靠度分析等領域，重視風險函數、存活曲線等概念。",
+      "keywords": [
+        "刪失數據",
+        "風險函數",
+        "存活曲線",
+        "Cox迴歸",
+        "Kaplan-Meier",
+        "時間至事件",
+        "右設限",
+        "風險比",
+        "存活機率",
+        "壽命數據"
+      ],
+      "typical_scenarios": [
+        "臨床研究：患者存活時間分析",
+        "可靠度工程：機器故障時間",
+        "客戶生命週期：客戶流失時間",
+        "失業研究：失業持續時間",
+        "社會學：婚姻持續時間分析"
+      ],
+      "data_characteristics": {
+        "time_to_event": "記錄從起點到事件發生的時間",
+        "censoring": "包含刪失資料（右設限、左設限、區間設限）",
+        "hazard_function": "關注瞬時風險率"
+      },
+      "common_challenges": [
+        "正確處理刪失機制",
+        "比例風險假設的驗證",
+        "競爭風險問題",
+        "時間相依共變數的處理"
+      ]
+    },
+    "bayesian": {
+      "name": "貝氏統計",
+      "name_en": "Bayesian Statistics",
+      "description": "基於貝氏定理的統計推論框架，結合先驗資訊與數據進行機率推論",
+      "detailed_description": "貝氏統計將參數視為隨機變數，透過貝氏定理結合先驗分佈與似然函數得到後驗分佈。可以自然地整合先前知識，提供參數的機率解釋，並量化不確定性。",
+      "keywords": [
+        "先驗分佈",
+        "後驗推論",
+        "MCMC",
+        "貝氏定理",
+        "機率推論",
+        "後驗分佈",
+        "先驗資訊",
+        "信賴區間",
+        "階層模型",
+        "參數不確定性"
+      ],
+      "typical_scenarios": [
+        "臨床試驗：整合歷史資料與新試驗",
+        "小樣本研究：透過先驗知識增強推論",
+        "階層模型：學校效果、多層次資料",
+        "預測建模：提供不確定性量化",
+        "決策分析：結合風險與效益"
+      ],
+      "data_characteristics": {
+        "prior_knowledge": "可整合先前研究或專家知識",
+        "uncertainty_quantification": "完整的不確定性量化",
+        "flexible_modeling": "模型彈性高，可處理複雜結構"
+      },
+      "common_challenges": [
+        "先驗分佈的選擇（主觀性）",
+        "計算成本高（需要 MCMC 等方法）",
+        "收斂診斷與檢驗",
+        "結果解釋與溝通（對非統計專家）"
+      ]
+    },
+    "machine_learning": {
+      "name": "機器學習",
+      "name_en": "Machine Learning",
+      "description": "資料驅動的預測模型，強調預測準確性而非模型可解釋性，包含樹模型、神經網路等",
+      "detailed_description": "機器學習方法通常以預測準確性為主要目標，透過演算法自動學習數據中的模式。包含監督式學習、非監督式學習、強化學習等多種範疇，常用於高維度、非線性、大數據情境。",
+      "keywords": [
+        "樹模型",
+        "神經網路",
+        "集成學習",
+        "深度學習",
+        "隨機森林",
+        "梯度提升",
+        "支持向量機",
+        "預測準確性",
+        "特徵工程",
+        "交叉驗證"
+      ],
+      "typical_scenarios": [
+        "影像辨識：物體偵測、人臉識別",
+        "自然語言處理：情感分析、機器翻譯",
+        "推薦系統：電商、影音平台",
+        "金融風控：信用評分、詐欺偵測",
+        "工業應用：預測性維護、品質控制"
+      ],
+      "data_characteristics": {
+        "large_scale": "通常處理大規模數據",
+        "complex_patterns": "可捕捉複雜非線性關係",
+        "feature_rich": "可處理多類型特徵（數值、類別、文字、影像）"
+      },
+      "common_challenges": [
+        "模型可解釋性低（黑箱問題）",
+        "過度配適風險高",
+        "超參數調校複雜",
+        "計算資源需求大",
+        "需要大量訓練數據"
+      ]
+    },
+    "multivariate": {
+      "name": "多變量分析",
+      "name_en": "Multivariate Analysis",
+      "description": "同時分析多個結果變數，探討變數間的相互關係與結構",
+      "detailed_description": "多變量分析處理具有多個結果變數的情況，關注變數間的相關結構、降維、分組等問題。與多元迴歸（多個自變數、單一因變數）不同，多變量分析有多個因變數。",
+      "keywords": [
+        "主成分分析",
+        "因子分析",
+        "典型相關",
+        "多變量檢定",
+        "MANOVA",
+        "降維",
+        "結構方程模型",
+        "聚類分析",
+        "判別分析",
+        "對應分析"
+      ],
+      "typical_scenarios": [
+        "心理學研究：量表分析、潛在特質測量",
+        "生態學：物種組成與環境因子關係",
+        "市場研究：消費者行為多面向分析",
+        "教育評量：多項能力指標分析",
+        "品質管制：多品質特性同時監控"
+      ],
+      "data_characteristics": {
+        "multiple_outcomes": "同時考慮多個結果變數",
+        "correlation_structure": "關注變數間相關結構",
+        "dimensionality": "可能涉及降維需求"
+      },
+      "common_challenges": [
+        "樣本數需求較高（相對於變數數）",
+        "結果解釋較複雜",
+        "多重檢定問題",
+        "變數間共線性處理"
+      ]
+    }
+  },
+  "domain_relationships": {
+    "high_dimensional": {
+      "often_combined_with": ["regression", "classification", "machine_learning"],
+      "complementary_to": ["bayesian"],
+      "mutually_exclusive_with": [],
+      "description": "高維度問題常與迴歸或分類結合，也常使用機器學習方法處理。貝氏方法可提供正規化的替代框架。"
+    },
+    "time_series": {
+      "often_combined_with": ["regression", "bayesian", "machine_learning"],
+      "complementary_to": ["spatial_statistics"],
+      "mutually_exclusive_with": [],
+      "description": "時間序列可結合迴歸建模，貝氏方法適合處理不確定性。時空數據則需結合空間統計。"
+    },
+    "spatial_statistics": {
+      "often_combined_with": ["regression", "time_series"],
+      "complementary_to": ["bayesian"],
+      "mutually_exclusive_with": [],
+      "description": "空間統計常與迴歸結合（空間迴歸），時空數據則需結合時間序列方法。"
+    },
+    "causal_inference": {
+      "often_combined_with": ["regression", "classification", "machine_learning"],
+      "complementary_to": ["bayesian", "survival_analysis"],
+      "mutually_exclusive_with": [],
+      "description": "因果推論可結合各種預測模型，但強調因果識別假設。貝氏方法可提供不確定性量化。"
+    },
+    "classification": {
+      "often_combined_with": ["high_dimensional", "machine_learning", "causal_inference"],
+      "complementary_to": ["bayesian"],
+      "mutually_exclusive_with": ["regression"],
+      "description": "分類問題可使用機器學習、高維度方法。與迴歸為不同結果類型，通常不同時使用。"
+    },
+    "regression": {
+      "often_combined_with": ["high_dimensional", "causal_inference", "time_series", "spatial_statistics"],
+      "complementary_to": ["bayesian", "machine_learning"],
+      "mutually_exclusive_with": ["classification"],
+      "description": "迴歸是最基礎的方法，可與多數領域結合。與分類為不同結果類型。"
+    },
+    "survival_analysis": {
+      "often_combined_with": ["regression", "causal_inference"],
+      "complementary_to": ["bayesian"],
+      "mutually_exclusive_with": [],
+      "description": "存活分析處理特殊時間至事件數據，可結合迴歸建模或因果推論。"
+    },
+    "bayesian": {
+      "often_combined_with": ["regression", "classification", "survival_analysis", "time_series"],
+      "complementary_to": ["high_dimensional", "machine_learning"],
+      "mutually_exclusive_with": [],
+      "description": "貝氏方法提供統計推論的另一套框架，可與大多數方法結合使用。"
+    },
+    "machine_learning": {
+      "often_combined_with": ["high_dimensional", "classification", "regression"],
+      "complementary_to": ["bayesian", "causal_inference"],
+      "mutually_exclusive_with": [],
+      "description": "機器學習強調預測準確性，可與多數領域結合，但需注意因果推論時的特殊考量。"
+    },
+    "multivariate": {
+      "often_combined_with": ["regression", "classification"],
+      "complementary_to": ["bayesian", "machine_learning"],
+      "mutually_exclusive_with": [],
+      "description": "多變量分析處理多個結果變數，可與迴歸、分類等結合。"
+    }
+  },
+  "usage_notes": {
+    "primary_domain": "每個方法應至少標記一個 primary 領域（權重 1.0），表示該方法的主要適用領域",
+    "secondary_domain": "可標記多個 secondary 領域（權重 0.5-0.8），表示方法也適用但非主要強項",
+    "applicable_domain": "可標記 applicable 領域（權重 0.3-0.5），表示在某些情況下可以使用",
+    "weight_guidelines": {
+      "primary": 1.0,
+      "secondary": "0.5 - 0.8",
+      "applicable": "0.3 - 0.5"
+    },
+    "combination_strategy": "當問題涉及多個領域時，系統會建議：(1) 分別推薦各領域方法；(2) 推薦同時支援多領域的方法；(3) 提供方法組合建議（先 A 再 B）"
+  },
+  "metadata": {
+    "created_by": "Model_Bridge Development Team",
+    "creation_date": "2025-01-19",
+    "schema_version": "1.0.0",
+    "total_domains": 10,
+    "language": "zh-TW",
+    "license": "MIT"
+  }
+}

@@ -247,7 +247,8 @@ def identify_question_domains(question: str, df_info: dict = None) -> dict:
                 {"role": "user", "content": prompt}
             ],
             temperature=0.1,  # 使用較低溫度以獲得穩定結果
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"},
+            timeout=30.0  # 設定 30 秒超時
         )
 
         result = json.loads(response.choices[0].message.content)

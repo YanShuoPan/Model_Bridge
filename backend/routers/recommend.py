@@ -54,18 +54,27 @@ def recommend_by_domains_endpoint(p: DomainRecIn):
             "total_matched": int  # 匹配到的方法數
         }
     """
+    import traceback
     try:
+        print(f"[API] 收到推薦請求: question='{p.question[:50]}...', top_n={p.top_n}")
         result = recommend_methods_by_domains(
             question=p.question,
             df_info=p.df_info,
             top_n=p.top_n,
             use_gpt_identification=True
         )
+        print(f"[API] 推薦成功: 返回 {len(result.get('recommended_methods', []))} 個方法")
         return result
     except Exception as e:
+        error_detail = traceback.format_exc()
+        print(f"[API] 推薦失敗: {error_detail}")
         return {
             "error": str(e),
+            "error_detail": error_detail,
             "question_domains": {},
             "recommended_methods": [],
-            "reasoning": f"推薦失敗: {str(e)}"
+            "reasoning": f"推薦失敗: {str(e)}",
+            "primary_domain": None,
+            "total_methods_evaluated": 0,
+            "total_matched": 0
         }

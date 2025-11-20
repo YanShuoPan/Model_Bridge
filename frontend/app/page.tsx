@@ -337,11 +337,11 @@ export default function Home() {
                       onClick={() => sendMessage(q)}
                       disabled={loading}
                       style={{
-                        padding: "8px 12px",
+                        padding: "10px 14px",
                         borderRadius: "8px",
                         border: "1px solid #d1d5db",
                         backgroundColor: loading ? "#f9fafb" : "#ffffff",
-                        fontSize: "13px",
+                        fontSize: "14px",
                         textAlign: "left",
                         cursor: loading ? "not-allowed" : "pointer",
                         transition: "all 0.2s",

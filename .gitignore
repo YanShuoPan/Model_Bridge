@@ -35,5 +35,7 @@ Thumbs.db
 
 # Claude settings
 .claude/settings.local.json
-NUL
+
+# Test files
 test_recommendation.py
+test_recommendation_mock.py

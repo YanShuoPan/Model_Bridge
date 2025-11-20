@@ -292,15 +292,19 @@ def generate_follow_up_questions(question: str, answer_context: str, question_ty
         )
 
         result = json.loads(response.choices[0].message.content)
-        return result.get("follow_up_questions", [])[:3]  # 最多 3 個
+        questions = result.get("follow_up_questions", [])[:3]  # 最多 3 個
+        print(f"[Follow-up Questions] 成功生成 {len(questions)} 個後續問題: {questions}")
+        return questions
 
     except Exception as e:
-        print(f"生成後續問題失敗: {e}")
+        print(f"[Follow-up Questions] 生成失敗: {e}")
         # 返回預設的通用問題
-        return [
+        default_questions = [
             "這個方法需要什麼樣的數據？",
             "有沒有實際的範例可以看？"
         ]
+        print(f"[Follow-up Questions] 使用預設問題: {default_questions}")
+        return default_questions
 
 
 def answer_question_directly(question: str, question_type: str) -> Dict[str, Any]:
@@ -351,6 +355,7 @@ def answer_question_directly(question: str, question_type: str) -> Dict[str, Any
 
         # 生成後續問題
         follow_up_questions = generate_follow_up_questions(question, answer, question_type)
+        print(f"[Direct Answer] 回覆包含 {len(follow_up_questions)} 個後續問題")
 
         return {
             "question": question,
@@ -555,12 +560,14 @@ def generate_chat_response(question: str) -> Dict[str, Any]:
             context = f"推薦方法: {method_info['name']}\n推薦理由: {analysis.get('reasoning', '')}\n下一步: {analysis.get('next_steps', '')}"
             follow_up_questions = generate_follow_up_questions(question, context, "method_recommendation")
             analysis["follow_up_questions"] = follow_up_questions
+            print(f"[Method Recommendation] 推薦方法回覆包含 {len(follow_up_questions)} 個後續問題")
 
     else:
         # 沒有推薦方法的情況，也生成後續問題
         context = f"分析結果: {analysis.get('reasoning', '')}\n建議: {analysis.get('next_steps', '')}"
         follow_up_questions = generate_follow_up_questions(question, context, "method_recommendation")
         analysis["follow_up_questions"] = follow_up_questions
+        print(f"[No Method] 無推薦方法回覆包含 {len(follow_up_questions)} 個後續問題")
 
     return response
 

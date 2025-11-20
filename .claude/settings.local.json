@@ -16,7 +16,10 @@
       "Bash(git stash:*)",
       "Bash(git checkout:*)",
       "Bash(pip install:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(NUL)",
+      "Bash(del /F ARCHITECTURE_DESIGN.md PROJECT_URLS.md IMPLEMENTATION_ROADMAP.md CONTRIBUTION_GUIDE.md EXAMPLE_RESULTS_DESIGN.md 2)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

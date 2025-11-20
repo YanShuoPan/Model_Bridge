@@ -35,3 +35,5 @@ Thumbs.db
 
 # Claude settings
 .claude/settings.local.json
+NUL
+test_recommendation.py

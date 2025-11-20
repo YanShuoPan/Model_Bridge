@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API || "http://localhost:8000/api";
 
@@ -313,9 +313,9 @@ export default function Home() {
             {msg.role === "assistant" && msg.data?.follow_up_questions && msg.data.follow_up_questions.length > 0 && (
               <div style={{
                 marginTop: "12px",
-                marginLeft: msg.role === "user" ? "0" : "0",
+                marginLeft: "0",
                 display: "flex",
-                justifyContent: msg.role === "user" ? "flex-end" : "flex-start"
+                justifyContent: "flex-start"
               }}>
                 <div style={{
                   maxWidth: "80%",

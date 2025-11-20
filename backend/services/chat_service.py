@@ -243,68 +243,28 @@ def classify_user_question(question: str) -> Dict[str, Any]:
         }
 
 
-def generate_follow_up_questions(question: str, answer_context: str, question_type: str) -> List[str]:
+def generate_follow_up_questions(question: str, answer_context: str, question_type: str, method_name: str = None) -> List[str]:
     """
-    根據使用者問題和回答內容，生成相關的後續問題
+    生成三個固定類型的後續問題
 
     Args:
         question: 使用者問題
         answer_context: 回答的內容或上下文
         question_type: 問題類型
+        method_name: 推薦的方法名稱（選填）
 
     Returns:
-        2-3 個後續問題列表
+        3 個固定類型的後續問題列表
     """
-    try:
-        prompt = f"""你是統計諮詢助手。使用者剛問了一個問題，你已經回答了。現在請生成 2-3 個相關的後續問題，讓對話更深入或延伸。
-
-使用者原問題：{question}
-問題類型：{question_type}
-回答概要：{answer_context[:300]}
-
-請生成後續問題時遵循以下原則：
-1. **深化理解型**：幫助使用者更深入理解剛才討論的概念
-2. **實務應用型**：引導使用者思考如何實際應用
-3. **延伸探索型**：引導使用者探索相關的統計方法或概念
-
-請用 JSON 格式回答：
-{{
-    "follow_up_questions": [
-        "後續問題1（20字內，自然口語化）",
-        "後續問題2（20字內，自然口語化）",
-        "後續問題3（20字內，自然口語化）"
+    # 固定回傳三種類型的問題
+    questions = [
+        f"想要更詳細了解{method_name if method_name else '這個方法'}嗎？",
+        f"想看{method_name if method_name else '這個方法'}的實際範例嗎？",
+        "想了解其他統計方法嗎？"
     ]
-}}
 
-要求：
-- 問題要簡短、具體、可操作
-- 避免過於技術性的問題
-- 使用「我」開頭（例如：我想知道...、如何...、什麼是...）"""
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "你是善於引導對話的統計諮詢助手。"},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            response_format={"type": "json_object"}
-        )
-
-        result = json.loads(response.choices[0].message.content)
-        questions = result.get("follow_up_questions", [])[:3]  # 最多 3 個
-        print(f"[Follow-up Questions] 成功生成 {len(questions)} 個後續問題: {questions}")
-        return questions
-
-    except Exception as e:
-        print(f"[Follow-up Questions] 生成失敗: {e}")
-        # 返回預設的通用問題
-        default_questions = [
-            "這個方法需要什麼樣的數據？",
-            "有沒有實際的範例可以看？"
-        ]
-        print(f"[Follow-up Questions] 使用預設問題: {default_questions}")
-        return default_questions
+    print(f"[Follow-up Questions] 生成 3 個固定後續問題: {questions}")
+    return questions
 
 
 def answer_question_directly(question: str, question_type: str) -> Dict[str, Any]:
@@ -353,8 +313,13 @@ def answer_question_directly(question: str, question_type: str) -> Dict[str, Any
 
         answer = response.choices[0].message.content
 
-        # 生成後續問題
-        follow_up_questions = generate_follow_up_questions(question, answer, question_type)
+        # 生成固定的後續問題
+        follow_up_questions = generate_follow_up_questions(
+            question=question,
+            answer_context=answer,
+            question_type=question_type,
+            method_name=None
+        )
         print(f"[Direct Answer] 回覆包含 {len(follow_up_questions)} 個後續問題")
 
         return {
@@ -556,16 +521,24 @@ def generate_chat_response(question: str) -> Dict[str, Any]:
             }]
             response["can_proceed"] = True
 
-            # 動態生成後續問題（推薦了方法的情況）
-            context = f"推薦方法: {method_info['name']}\n推薦理由: {analysis.get('reasoning', '')}\n下一步: {analysis.get('next_steps', '')}"
-            follow_up_questions = generate_follow_up_questions(question, context, "method_recommendation")
+            # 生成固定的後續問題（推薦了方法的情況）
+            follow_up_questions = generate_follow_up_questions(
+                question=question,
+                answer_context="",
+                question_type="method_recommendation",
+                method_name=method_info['name']
+            )
             analysis["follow_up_questions"] = follow_up_questions
             print(f"[Method Recommendation] 推薦方法回覆包含 {len(follow_up_questions)} 個後續問題")
 
     else:
         # 沒有推薦方法的情況，也生成後續問題
-        context = f"分析結果: {analysis.get('reasoning', '')}\n建議: {analysis.get('next_steps', '')}"
-        follow_up_questions = generate_follow_up_questions(question, context, "method_recommendation")
+        follow_up_questions = generate_follow_up_questions(
+            question=question,
+            answer_context="",
+            question_type="method_recommendation",
+            method_name=None
+        )
         analysis["follow_up_questions"] = follow_up_questions
         print(f"[No Method] 無推薦方法回覆包含 {len(follow_up_questions)} 個後續問題")
 

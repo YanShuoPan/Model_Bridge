@@ -99,107 +99,105 @@ export default function Home() {
         // 原本的方法推薦模式
         // 分析結果
         const analysis = data.analysis;
-      if (analysis) {
-        assistantContent += `### 📊 問題分析\n\n`;
-        assistantContent += `**任務類型：** ${getTaskTypeLabel(analysis.task_type)}\n\n`;
-        assistantContent += `**分析：** ${analysis.reasoning}\n\n`;
+        if (analysis) {
+          assistantContent += `### 📊 問題分析\n\n`;
+          assistantContent += `**任務類型：** ${getTaskTypeLabel(analysis.task_type)}\n\n`;
+          assistantContent += `**分析：** ${analysis.reasoning}\n\n`;
 
-        // 如果有推薦方法
-        if (data.recommended_methods && data.recommended_methods.length > 0) {
-          const method = data.recommended_methods[0];
-          assistantContent += `---\n\n### ✅ 推薦方法\n\n`;
-          assistantContent += `**${method.name}**\n\n`;
-          assistantContent += `${method.description}\n\n`;
+          // 如果有推薦方法
+          if (data.recommended_methods && data.recommended_methods.length > 0) {
+            const method = data.recommended_methods[0];
+            assistantContent += `---\n\n### ✅ 推薦方法\n\n`;
+            assistantContent += `**${method.name}**\n\n`;
+            assistantContent += `${method.description}\n\n`;
 
-          assistantContent += `**📋 適用情境：**\n`;
-          method.suitable_for.forEach((s: string) => {
-            assistantContent += `• ${s}\n`;
-          });
-
-          assistantContent += `\n**📦 需要的資料：**\n`;
-          if (analysis.data_requirements && analysis.data_requirements.length > 0) {
-            analysis.data_requirements.forEach((req: string) => {
-              assistantContent += `• ${req}\n`;
-            });
-          }
-
-          assistantContent += `\n**🎯 能回答的問題：**\n${analysis.what_you_can_learn}\n\n`;
-
-          assistantContent += `**⚠️ 重要假設：**\n`;
-          method.assumptions.forEach((a: string) => {
-            assistantContent += `• ${a}\n`;
-          });
-
-          assistantContent += `\n**📈 輸出結果：**\n`;
-          method.outputs.forEach((o: string) => {
-            assistantContent += `• ${o}\n`;
-          });
-
-          // 【新增】顯示預執行結果
-          if (method.pre_run_results && method.result_explanation) {
-            const preRun = method.pre_run_results;
-
-            assistantContent += `\n---\n\n### 📊 範例執行結果\n\n`;
-            assistantContent += `**${preRun.example_name}** (${preRun.summary.sample_size} 筆資料)\n\n`;
-
-            // 顯示 GPT 生成的解釋
-            assistantContent += `${method.result_explanation}\n\n`;
-
-            // 顯示關鍵指標
-            assistantContent += `**關鍵指標：**\n`;
-            Object.entries(preRun.metrics).forEach(([key, value]) => {
-              const displayName = key === 'accuracy' ? '準確率' :
-                                  key === 'auc' ? 'AUC' :
-                                  key === 'precision' ? '精確率' :
-                                  key === 'recall' ? '召回率' : key;
-              assistantContent += `• ${displayName}: ${value}\n`;
+            assistantContent += `**📋 適用情境：**\n`;
+            method.suitable_for.forEach((s: string) => {
+              assistantContent += `• ${s}\n`;
             });
 
-            // 顯示圖表（提供查看連結）
-            if (preRun.figures && preRun.figures.length > 0) {
-              assistantContent += `\n**視覺化圖表：**\n`;
-              preRun.figures.forEach((fig: any) => {
-                // 使用後端的靜態文件路徑
-                const figPath = `backend/knowledge_base/methods/${preRun.method_id}/examples/${preRun.example_id}/pre_run_results/${fig.relative_path}`;
-                assistantContent += `• ${fig.description}\n`;
+            assistantContent += `\n**📦 需要的資料：**\n`;
+            if (analysis.data_requirements && analysis.data_requirements.length > 0) {
+              analysis.data_requirements.forEach((req: string) => {
+                assistantContent += `• ${req}\n`;
               });
-              assistantContent += `\n*（圖表已預先生成，展示實際分析結果）*\n`;
+            }
+
+            assistantContent += `\n**🎯 能回答的問題：**\n${analysis.what_you_can_learn}\n\n`;
+
+            assistantContent += `**⚠️ 重要假設：**\n`;
+            method.assumptions.forEach((a: string) => {
+              assistantContent += `• ${a}\n`;
+            });
+
+            assistantContent += `\n**📈 輸出結果：**\n`;
+            method.outputs.forEach((o: string) => {
+              assistantContent += `• ${o}\n`;
+            });
+
+            // 【新增】顯示預執行結果
+            if (method.pre_run_results && method.result_explanation) {
+              const preRun = method.pre_run_results;
+
+              assistantContent += `\n---\n\n### 📊 範例執行結果\n\n`;
+              assistantContent += `**${preRun.example_name}** (${preRun.summary.sample_size} 筆資料)\n\n`;
+
+              // 顯示 GPT 生成的解釋
+              assistantContent += `${method.result_explanation}\n\n`;
+
+              // 顯示關鍵指標
+              assistantContent += `**關鍵指標：**\n`;
+              Object.entries(preRun.metrics).forEach(([key, value]) => {
+                const displayName = key === 'accuracy' ? '準確率' :
+                                    key === 'auc' ? 'AUC' :
+                                    key === 'precision' ? '精確率' :
+                                    key === 'recall' ? '召回率' : key;
+                assistantContent += `• ${displayName}: ${value}\n`;
+              });
+
+              // 顯示圖表（提供查看連結）
+              if (preRun.figures && preRun.figures.length > 0) {
+                assistantContent += `\n**視覺化圖表：**\n`;
+                preRun.figures.forEach((fig: any) => {
+                  assistantContent += `• ${fig.description}\n`;
+                });
+                assistantContent += `\n*（圖表已預先生成，展示實際分析結果）*\n`;
+              }
+            }
+
+            // 範例資料展示
+            if (method.example_data && analysis.show_example) {
+              const exData = method.example_data;
+              assistantContent += `\n---\n\n### 📂 範例資料\n\n`;
+              assistantContent += `我們提供了 **${exData.name}** 供你測試：\n\n`;
+              assistantContent += `**資料說明：** ${exData.description}\n\n`;
+              assistantContent += `**資料欄位：**\n`;
+              Object.entries(exData.columns).forEach(([key, val]) => {
+                assistantContent += `• ${key}: ${val}\n`;
+              });
+              assistantContent += `\n**樣本數：** ${exData.sample_size}\n\n`;
+              assistantContent += `**預期結果：** ${exData.what_to_expect}\n\n`;
+            }
+
+            assistantContent += `---\n\n`;
+            assistantContent += `💡 **下一步：** ${analysis.next_steps}\n\n`;
+
+            // 後續問題建議（儲存到變數）
+            if (analysis.follow_up_questions && analysis.follow_up_questions.length > 0) {
+              followUpQuestions = analysis.follow_up_questions;
+            }
+
+          } else {
+            assistantContent += `---\n\n`;
+            assistantContent += `😕 ${analysis.reasoning}\n\n`;
+            assistantContent += `**建議：** ${analysis.next_steps}\n\n`;
+
+            // 後續問題建議（儲存到變數）
+            if (analysis.follow_up_questions && analysis.follow_up_questions.length > 0) {
+              followUpQuestions = analysis.follow_up_questions;
             }
           }
-
-          // 範例資料展示
-          if (method.example_data && analysis.show_example) {
-            const exData = method.example_data;
-            assistantContent += `\n---\n\n### 📂 範例資料\n\n`;
-            assistantContent += `我們提供了 **${exData.name}** 供你測試：\n\n`;
-            assistantContent += `**資料說明：** ${exData.description}\n\n`;
-            assistantContent += `**資料欄位：**\n`;
-            Object.entries(exData.columns).forEach(([key, val]) => {
-              assistantContent += `• ${key}: ${val}\n`;
-            });
-            assistantContent += `\n**樣本數：** ${exData.sample_size}\n\n`;
-            assistantContent += `**預期結果：** ${exData.what_to_expect}\n\n`;
-          }
-
-          assistantContent += `---\n\n`;
-          assistantContent += `💡 **下一步：** ${analysis.next_steps}\n\n`;
-
-          // 後續問題建議（儲存到變數）
-          if (analysis.follow_up_questions && analysis.follow_up_questions.length > 0) {
-            followUpQuestions = analysis.follow_up_questions;
-          }
-
-        } else {
-          assistantContent += `---\n\n`;
-          assistantContent += `😕 ${analysis.reasoning}\n\n`;
-          assistantContent += `**建議：** ${analysis.next_steps}\n\n`;
-
-          // 後續問題建議（儲存到變數）
-          if (analysis.follow_up_questions && analysis.follow_up_questions.length > 0) {
-            followUpQuestions = analysis.follow_up_questions;
-          }
         }
-      }
       } // 結束方法推薦模式
 
       const assistantMessage: Message = {

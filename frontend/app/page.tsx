@@ -88,10 +88,13 @@ export default function Home() {
 
       // 生成助手回覆
       let assistantContent = "";
+      let followUpQuestions: string[] = [];  // 儲存後續問題
 
       // 如果是直接回答模式
       if (data.is_direct_answer) {
         assistantContent = data.answer;
+        // 取得後續問題
+        followUpQuestions = data.follow_up_questions || [];
       } else {
         // 原本的方法推薦模式
         // 分析結果
@@ -181,12 +184,9 @@ export default function Home() {
           assistantContent += `---\n\n`;
           assistantContent += `💡 **下一步：** ${analysis.next_steps}\n\n`;
 
-          // 後續問題建議
+          // 後續問題建議（儲存到變數）
           if (analysis.follow_up_questions && analysis.follow_up_questions.length > 0) {
-            assistantContent += `**💬 你也可以問：**\n`;
-            analysis.follow_up_questions.forEach((q: string) => {
-              assistantContent += `• ${q}\n`;
-            });
+            followUpQuestions = analysis.follow_up_questions;
           }
 
         } else {
@@ -194,12 +194,9 @@ export default function Home() {
           assistantContent += `😕 ${analysis.reasoning}\n\n`;
           assistantContent += `**建議：** ${analysis.next_steps}\n\n`;
 
-          // 後續問題建議
+          // 後續問題建議（儲存到變數）
           if (analysis.follow_up_questions && analysis.follow_up_questions.length > 0) {
-            assistantContent += `**💬 你可以這樣問：**\n`;
-            analysis.follow_up_questions.forEach((q: string) => {
-              assistantContent += `• ${q}\n`;
-            });
+            followUpQuestions = analysis.follow_up_questions;
           }
         }
       }
@@ -208,7 +205,10 @@ export default function Home() {
       const assistantMessage: Message = {
         role: "assistant",
         content: assistantContent,
-        data: data
+        data: {
+          ...data,
+          follow_up_questions: followUpQuestions  // 統一儲存後續問題
+        }
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -292,21 +292,82 @@ export default function Home() {
       }}>
         {messages.map((msg, idx) => (
           <div key={idx} style={{
-            marginBottom: "20px",
-            display: "flex",
-            justifyContent: msg.role === "user" ? "flex-end" : "flex-start"
+            marginBottom: "20px"
           }}>
             <div style={{
-              maxWidth: "80%",
-              padding: "12px 16px",
-              borderRadius: "12px",
-              backgroundColor: msg.role === "user" ? "#3b82f6" : "#f3f4f6",
-              color: msg.role === "user" ? "#ffffff" : "#1f2937",
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.6
+              display: "flex",
+              justifyContent: msg.role === "user" ? "flex-end" : "flex-start"
             }}>
-              {msg.content}
+              <div style={{
+                maxWidth: "80%",
+                padding: "12px 16px",
+                borderRadius: "12px",
+                backgroundColor: msg.role === "user" ? "#3b82f6" : "#f3f4f6",
+                color: msg.role === "user" ? "#ffffff" : "#1f2937",
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.6
+              }}>
+                {msg.content}
+              </div>
             </div>
+
+            {/* 顯示後續問題按鈕（僅助手訊息且有後續問題時） */}
+            {msg.role === "assistant" && msg.data?.follow_up_questions && msg.data.follow_up_questions.length > 0 && (
+              <div style={{
+                marginTop: "12px",
+                marginLeft: msg.role === "user" ? "0" : "0",
+                display: "flex",
+                justifyContent: msg.role === "user" ? "flex-end" : "flex-start"
+              }}>
+                <div style={{
+                  maxWidth: "80%",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px"
+                }}>
+                  <div style={{
+                    fontSize: "13px",
+                    color: "#6b7280",
+                    fontWeight: 500,
+                    marginBottom: "4px"
+                  }}>
+                    💬 你也可以問：
+                  </div>
+                  {msg.data.follow_up_questions.map((q: string, qIdx: number) => (
+                    <button
+                      key={qIdx}
+                      onClick={() => sendMessage(q)}
+                      disabled={loading}
+                      style={{
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #d1d5db",
+                        backgroundColor: loading ? "#f9fafb" : "#ffffff",
+                        fontSize: "13px",
+                        textAlign: "left",
+                        cursor: loading ? "not-allowed" : "pointer",
+                        transition: "all 0.2s",
+                        color: "#374151"
+                      }}
+                      onMouseOver={(e) => {
+                        if (!loading) {
+                          e.currentTarget.style.backgroundColor = "#f3f4f6";
+                          e.currentTarget.style.borderColor = "#3b82f6";
+                        }
+                      }}
+                      onMouseOut={(e) => {
+                        if (!loading) {
+                          e.currentTarget.style.backgroundColor = "#ffffff";
+                          e.currentTarget.style.borderColor = "#d1d5db";
+                        }
+                      }}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ))}
 

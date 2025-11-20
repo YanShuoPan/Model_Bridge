@@ -202,20 +202,19 @@ def classify_user_question(question: str) -> Dict[str, Any]:
 請用以下 JSON 格式回答：
 {{
     "task_type": "classification/causal/prediction",
-    "recommended_method": "logistic_regression 或 dr_ate_cbps 或 none",
+    "recommended_method": "logistic_regression 或 dr_ate_cbps 或 oga_hdic 或 none",
     "confidence": "high/medium/low",
     "reasoning": "推薦理由（80字內，簡潔有力）",
     "data_requirements": ["需要的數據欄位1", "需要的數據欄位2"],
     "what_you_can_learn": "這個方法能回答什麼問題（50字內）",
     "next_steps": "建議的下一步行動（50字內）",
-    "follow_up_questions": ["可以問的問題1", "可以問的問題2"],
     "show_example": true/false
 }}
 
 重要：
 - 如果無法判斷或問題不適合現有方法，recommended_method 設為 "none"，reasoning 要簡短（30字內）
 - show_example: 如果推薦了方法，設為 true（要主動展示範例）
-- follow_up_questions: 提供 2-3 個使用者可以接著問的問題
+- follow_up_questions 將在之後動態生成
 """
 
         response = client.chat.completions.create(
@@ -244,6 +243,66 @@ def classify_user_question(question: str) -> Dict[str, Any]:
         }
 
 
+def generate_follow_up_questions(question: str, answer_context: str, question_type: str) -> List[str]:
+    """
+    根據使用者問題和回答內容，生成相關的後續問題
+
+    Args:
+        question: 使用者問題
+        answer_context: 回答的內容或上下文
+        question_type: 問題類型
+
+    Returns:
+        2-3 個後續問題列表
+    """
+    try:
+        prompt = f"""你是統計諮詢助手。使用者剛問了一個問題，你已經回答了。現在請生成 2-3 個相關的後續問題，讓對話更深入或延伸。
+
+使用者原問題：{question}
+問題類型：{question_type}
+回答概要：{answer_context[:300]}
+
+請生成後續問題時遵循以下原則：
+1. **深化理解型**：幫助使用者更深入理解剛才討論的概念
+2. **實務應用型**：引導使用者思考如何實際應用
+3. **延伸探索型**：引導使用者探索相關的統計方法或概念
+
+請用 JSON 格式回答：
+{{
+    "follow_up_questions": [
+        "後續問題1（20字內，自然口語化）",
+        "後續問題2（20字內，自然口語化）",
+        "後續問題3（20字內，自然口語化）"
+    ]
+}}
+
+要求：
+- 問題要簡短、具體、可操作
+- 避免過於技術性的問題
+- 使用「我」開頭（例如：我想知道...、如何...、什麼是...）"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "你是善於引導對話的統計諮詢助手。"},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            response_format={"type": "json_object"}
+        )
+
+        result = json.loads(response.choices[0].message.content)
+        return result.get("follow_up_questions", [])[:3]  # 最多 3 個
+
+    except Exception as e:
+        print(f"生成後續問題失敗: {e}")
+        # 返回預設的通用問題
+        return [
+            "這個方法需要什麼樣的數據？",
+            "有沒有實際的範例可以看？"
+        ]
+
+
 def answer_question_directly(question: str, question_type: str) -> Dict[str, Any]:
     """
     直接回答使用者問題（非方法推薦）
@@ -253,7 +312,7 @@ def answer_question_directly(question: str, question_type: str) -> Dict[str, Any
         question_type: 問題類型
 
     Returns:
-        直接回答的內容
+        直接回答的內容（包含後續問題）
     """
     try:
         # 準備知識庫內容
@@ -290,11 +349,15 @@ def answer_question_directly(question: str, question_type: str) -> Dict[str, Any
 
         answer = response.choices[0].message.content
 
+        # 生成後續問題
+        follow_up_questions = generate_follow_up_questions(question, answer, question_type)
+
         return {
             "question": question,
             "question_type": question_type,
             "answer": answer,
-            "is_direct_answer": True
+            "is_direct_answer": True,
+            "follow_up_questions": follow_up_questions  # 新增
         }
 
     except Exception as e:
@@ -303,7 +366,8 @@ def answer_question_directly(question: str, question_type: str) -> Dict[str, Any
             "question": question,
             "question_type": question_type,
             "answer": "抱歉，我無法回答這個問題。請嘗試換個方式問，或參考範例問題。",
-            "is_direct_answer": True
+            "is_direct_answer": True,
+            "follow_up_questions": []
         }
 
 
@@ -466,7 +530,7 @@ def generate_chat_response(question: str) -> Dict[str, Any]:
         if recommended_method_id in AVAILABLE_METHODS:
             method_info = AVAILABLE_METHODS[recommended_method_id].copy()
 
-            # 【新增】載入預執行結果
+            # 載入預執行結果
             pre_run_results = load_pre_run_results(recommended_method_id)
 
             if pre_run_results:
@@ -486,6 +550,17 @@ def generate_chat_response(question: str) -> Dict[str, Any]:
                 **method_info
             }]
             response["can_proceed"] = True
+
+            # 動態生成後續問題（推薦了方法的情況）
+            context = f"推薦方法: {method_info['name']}\n推薦理由: {analysis.get('reasoning', '')}\n下一步: {analysis.get('next_steps', '')}"
+            follow_up_questions = generate_follow_up_questions(question, context, "method_recommendation")
+            analysis["follow_up_questions"] = follow_up_questions
+
+    else:
+        # 沒有推薦方法的情況，也生成後續問題
+        context = f"分析結果: {analysis.get('reasoning', '')}\n建議: {analysis.get('next_steps', '')}"
+        follow_up_questions = generate_follow_up_questions(question, context, "method_recommendation")
+        analysis["follow_up_questions"] = follow_up_questions
 
     return response
 
